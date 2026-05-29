@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         stability: 0.7,
         similarity_boost: 0.75,
       },
-      output_format: 'mp3_44100_128',
+      output_format: 'mp3_22050_32',
     });
 
     const stream = new ReadableStream({
