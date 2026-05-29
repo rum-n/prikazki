@@ -17,6 +17,7 @@ export default function ReaderPage() {
   const [chapterIndex, setChapterIndex] = useState(0);
   const [sentenceIndex, setSentenceIndex] = useState(0);
   const [playerState, setPlayerState] = useState<PlayerState>('idle');
+  const [ttsError, setTtsError] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
   const [sleepSecondsLeft, setSleepSecondsLeft] = useState<number | null>(null);
   const [chapterOpen, setChapterOpen] = useState(false);
@@ -121,7 +122,7 @@ export default function ReaderPage() {
       body: JSON.stringify({ text: sentence }),
     });
 
-    if (!res.ok) throw new Error(`TTS failed: ${res.status}`);
+    if (!res.ok) throw new Error(await res.text());
 
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
@@ -150,6 +151,7 @@ export default function ReaderPage() {
     autoAdvanceRef.current = shouldAutoAdvance;
 
     try {
+      setTtsError(null);
       const url = await fetchAudio(ci, si);
 
       // User may have paused while we were fetching
@@ -179,7 +181,9 @@ export default function ReaderPage() {
 
       await audio.play();
       setPlayerState('playing');
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setTtsError(msg);
       setPlayerState('error');
     }
   }
@@ -341,6 +345,13 @@ export default function ReaderPage() {
         currentIndex={sentenceIndex}
         onTap={handleSentenceTap}
       />
+
+      {/* TTS error banner */}
+      {ttsError && (
+        <div className="shrink-0 mx-4 mb-2 px-3 py-2 rounded-lg bg-destructive/10 border border-destructive/30 text-xs text-destructive">
+          {ttsError}
+        </div>
+      )}
 
       {/* Player */}
       <PlayerBar

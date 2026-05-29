@@ -25,8 +25,6 @@ export async function POST(req: Request) {
       voice_settings: {
         stability: 0.7,
         similarity_boost: 0.75,
-        style: 0.2,
-        use_speaker_boost: true,
       },
       output_format: 'mp3_44100_128',
     });
@@ -47,7 +45,8 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
-    console.error('TTS error:', error);
-    return new Response('TTS failed', { status: 500 });
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('TTS error:', message);
+    return new Response(`TTS failed: ${message}`, { status: 500 });
   }
 }
