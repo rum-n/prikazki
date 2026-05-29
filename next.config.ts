@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // epubjs is dynamically imported in client code only, no server-side bundling needed
+  turbopack: {},
 };
 
 export default nextConfig;
