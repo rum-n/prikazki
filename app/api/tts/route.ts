@@ -2,13 +2,6 @@ import { ElevenLabsClient } from 'elevenlabs';
 
 export const runtime = 'nodejs';
 
-const client = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY!,
-});
-
-// Charlotte — expressive multilingual voice with strong Bulgarian support
-const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'XB0fDUnXU5powFXDhCwa';
-
 export async function POST(req: Request) {
   const body = await req.json() as { text?: string };
   const text = body.text;
@@ -16,6 +9,14 @@ export async function POST(req: Request) {
   if (!text || typeof text !== 'string' || text.length === 0 || text.length > 2000) {
     return new Response('Invalid text', { status: 400 });
   }
+
+  // Instantiate inside the handler so env vars are read at request time, not build time
+  const client = new ElevenLabsClient({
+    apiKey: process.env.ELEVENLABS_API_KEY!,
+  });
+
+  // Charlotte — expressive multilingual voice with strong Bulgarian support
+  const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'XB0fDUnXU5powFXDhCwa';
 
   try {
     const audioStream = await client.textToSpeech.convert(VOICE_ID, {
