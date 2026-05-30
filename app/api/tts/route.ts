@@ -18,15 +18,13 @@ export async function POST(req: Request) {
   // Charlotte — expressive multilingual voice with strong Bulgarian support
   const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || 'XB0fDUnXU5powFXDhCwa';
 
+  console.log(`TTS request: voiceId=${VOICE_ID} textLen=${text.length}`);
+
   try {
+    // Minimal request — no output_format, no voice_settings — uses account defaults
     const audioStream = await client.textToSpeech.convert(VOICE_ID, {
       text,
       model_id: 'eleven_multilingual_v2',
-      voice_settings: {
-        stability: 0.7,
-        similarity_boost: 0.75,
-      },
-      output_format: 'mp3_22050_32',
     });
 
     const stream = new ReadableStream({
@@ -45,8 +43,9 @@ export async function POST(req: Request) {
       },
     });
   } catch (error) {
+    // Log the full error object so we can see all fields Railway gives us
+    console.error('TTS error full:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     const message = error instanceof Error ? error.message : String(error);
-    console.error('TTS error:', message);
     return new Response(`TTS failed: ${message}`, { status: 500 });
   }
 }
